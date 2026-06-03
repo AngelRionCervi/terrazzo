@@ -603,7 +603,7 @@ export interface TypographyValueNormalized {
   [key: string]: unknown;
 }
 
-export interface TokenTransformedBase {
+export interface TokenTransformedBase<$token extends TokenNormalized = TokenNormalized> {
   /** Original Token ID */
   id: string;
   /** ID unique to this format. */
@@ -618,7 +618,7 @@ export interface TokenTransformedBase {
    */
   permutationID: string | undefined;
   /** The original token. */
-  token: TokenNormalized;
+  token: $token;
   /** Arbitrary metadata set by plugins. */
   meta?: Record<string | number | symbol, unknown> & {
     /**
@@ -631,15 +631,32 @@ export interface TokenTransformedBase {
 }
 
 /** Transformed token with a single value. Note that this may be any type! */
-export interface TokenTransformedSingleValue extends TokenTransformedBase {
+export interface TokenTransformedSingleValue<$token extends TokenNormalized = TokenNormalized> extends TokenTransformedBase<$token> {
   type: 'SINGLE_VALUE';
   value: string;
 }
 
 /** Transformed token with multiple values. Note that this may be any type! */
-export interface TokenTransformedMultiValue extends TokenTransformedBase {
+export interface TokenTransformedMultiValue<$token extends TokenNormalized = TokenNormalized> extends TokenTransformedBase<$token> {
   type: 'MULTI_VALUE';
   value: Record<string, string>;
 }
 
-export type TokenTransformed = TokenTransformedSingleValue | TokenTransformedMultiValue;
+export type TokenTransformed<$token extends TokenNormalized = TokenNormalized> = TokenTransformedSingleValue<$token> | TokenTransformedMultiValue<$token>;
+
+export type BooleanTokenTransformed = TokenTransformed<BooleanTokenNormalized>;
+export type BorderTokenTransformed = TokenTransformed<BorderTokenNormalized>;
+export type ColorTokenTransformed = TokenTransformed<ColorTokenNormalized>;
+export type CubicBezierTokenTransformed = TokenTransformed<CubicBezierTokenNormalized>;
+export type DimensionTokenTransformed = TokenTransformed<DimensionTokenNormalized>;
+export type DurationTokenTransformed = TokenTransformed<DurationTokenNormalized>;
+export type FontFamilyTokenTransformed = TokenTransformed<FontFamilyTokenNormalized>;
+export type FontWeightTokenTransformed = TokenTransformed<FontWeightTokenNormalized>;
+export type GradientTokenTransformed = TokenTransformed<GradientTokenNormalized>;
+export type LinkTokenTransformed = TokenTransformed<LinkTokenNormalized>;
+export type NumberTokenTransformed = TokenTransformed<NumberTokenNormalized>;
+export type ShadowTokenTransformed = TokenTransformed<ShadowTokenNormalized>;
+export type StringTokenTransformed = TokenTransformed<StringTokenNormalized>;
+export type StrokeStyleTokenTransformed = TokenTransformed<StrokeStyleTokenNormalized>;
+export type TransitionTokenTransformed = TokenTransformed<TransitionTokenNormalized>;
+export type TypographyTokenTransformed = TokenTransformed<TypographyTokenNormalized>;
