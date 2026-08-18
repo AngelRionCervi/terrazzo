@@ -409,6 +409,14 @@ export interface Resolver<
    * modifiers, the entire resolver is non-orthogonal.
    */
   orthogonal: boolean;
+  /**
+   * Produce a tokens set that only contains tokens common (in id and value) across the different sets and / or modifiers passed as options.
+   * If no options are passed, it will return the tokens common across all sets and modifiers.
+   *
+   * This is useful for generating a "baseline" set of tokens that are guaranteed to be present across different permutations.
+   * It also caches the result, same as the apply method.
+   */
+  getCommonTokens(options?: ResolverApplicationOptions): TokenNormalizedSet;
 }
 
 export interface ResolverSource {
@@ -557,3 +565,24 @@ export interface RefMapEntry {
 }
 
 export type RefMap = Record<string, RefMapEntry>;
+
+export interface CreateResolverOptions {
+  config: ConfigInit;
+  logger: Logger;
+  sources: InputSourceWithDocument[];
+  orthogonal: boolean;
+}
+
+export interface LoadResolverOptions {
+  config: ConfigInit;
+  logger: Logger;
+  req: (url: URL, origin: URL) => Promise<string>;
+  yamlToMomoa?: typeof ytm;
+}
+
+export interface ResolveTokensOptions {
+  input: Partial<ResolverInput>;
+  resolutionOrder: ResolverSourceNormalized['resolutionOrder'];
+  logger: Logger;
+  options?: ResolverApplicationOptions;
+}

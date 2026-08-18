@@ -5,9 +5,10 @@ import stripAnsi from 'strip-ansi';
 import { describe, expect, it } from 'vitest';
 
 import defineConfig from '../src/config.js';
+import { calculatePermutations } from '../src/lib/resolver-utils.js';
 import Logger from '../src/logger.js';
 import parse from '../src/parse/index.js';
-import { calculatePermutations, validateResolver } from '../src/resolver/index.js';
+import { validateResolver } from '../src/resolver/index.js';
 
 describe('Resolver module', () => {
   describe('core', () => {

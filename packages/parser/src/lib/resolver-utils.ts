@@ -1,4 +1,4 @@
-import type { ResolverApplicationOptions } from '../types.js';
+import type { ResolverApplicationOptions, ResolverInput } from '../types.js';
 import { alphaComparator } from './array.js';
 
 /**
@@ -78,4 +78,22 @@ export function destructiveMerge(a: object, b: object): void {
       (a as any)[k] = b2;
     }
   }
+}
+
+/** Calculate all permutations */
+export function calculatePermutations(options: [string, string[]][]) {
+  const permutationCount = [1];
+  for (const [_name, contexts] of options) {
+    permutationCount.push(contexts.length * (permutationCount.at(-1) || 1));
+  }
+  const permutations: Record<string, string>[] = [];
+  for (let i = 0; i < permutationCount.at(-1)!; i++) {
+    const input: ResolverInput = {};
+    for (let j = 0; j < options.length; j++) {
+      const [name, contexts] = options[j]!;
+      input[name] = contexts[Math.floor(i / permutationCount[j]!) % contexts.length]!;
+    }
+    permutations.push(input);
+  }
+  return permutations.length > 0 ? permutations : [{}];
 }
