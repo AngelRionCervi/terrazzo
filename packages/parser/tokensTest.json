@@ -1,0 +1,56 @@
+{
+  "dark-blue": {
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0,
+        0.03,
+        0.2
+      ],
+      "alpha": 1,
+      "hex": "#000933"
+    }
+  },
+  "dark-blue.mode..": {
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0,
+        0.03,
+        0.2
+      ],
+      "alpha": 1,
+      "hex": "#000933"
+    }
+  },
+  "dark-blue.originalValue": {
+    "$value": "{dark-blue-800}"
+  },
+  "light-blue": {
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0.8,
+        0.9,
+        1
+      ],
+      "alpha": 1,
+      "hex": "#cce5ff"
+    }
+  },
+  "light-blue.mode..": {
+    "$value": {
+      "colorSpace": "srgb",
+      "components": [
+        0.8,
+        0.9,
+        1
+      ],
+      "alpha": 1,
+      "hex": "#cce5ff"
+    }
+  },
+  "light-blue.originalValue": {
+    "$value": "{light-blue-200}"
+  }
+}

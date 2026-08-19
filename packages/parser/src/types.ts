@@ -377,6 +377,37 @@ export interface ResolverApplicationOptions {
   modifiers?: string[];
 }
 
+export interface ResolverCommonGetterOptions {
+  /**
+   * Resolve DTCG aliases when applying the input.
+   *
+   * @default true
+   */
+  resolveAliases?: boolean;
+  /**
+   * Limit input application only to the listed sets.
+   *
+   * In combination with `modifiers`, this will limit output to only
+   * tokens declared within the options given. If tokens are referenced by alises
+   * outside these options, the application will fail unless `resolveAliases` is
+   * set to false.
+   */
+  sets?: string[];
+  /**
+   * Limit input application only to the listed modifiers.
+   *
+   * In combination with `sets`, this will limit output to only
+   * tokens declared within the options given. If tokens are referenced by alises
+   * outside these options, the application will fail unless `resolveAliases` is
+   * set to false.
+   */
+  modifiers?: string[];
+
+  onlyAlias?: boolean;
+
+  onlyPrimitive?: boolean;
+}
+
 export interface Resolver<
   Inputs extends Record<string, string[]> = Record<string, string[]>,
   Input = Record<keyof Inputs, Inputs[keyof Inputs][number]>,
@@ -416,7 +447,7 @@ export interface Resolver<
    * This is useful for generating a "baseline" set of tokens that are guaranteed to be present across different permutations.
    * It also caches the result, same as the apply method.
    */
-  getCommonTokens(options?: ResolverApplicationOptions): TokenNormalizedSet;
+  getCommonTokens(options?: ResolverCommonGetterOptions): TokenNormalizedSet;
 }
 
 export interface ResolverSource {

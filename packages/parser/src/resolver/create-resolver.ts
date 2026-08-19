@@ -205,15 +205,15 @@ export function createResolver(
     getCommonTokens(options) {
       const permutationID = `common_${getPermutationID(inputDefaults, options)}`;
 
-      if (resolverCache[permutationID]) {
-        return resolverCache[permutationID];
-      }
+      // if (resolverCache[permutationID]) {
+      //   return resolverCache[permutationID];
+      // }
 
       const possiblePermutations = this.listPermutations?.() || [];
 
       const resolvedTokensByInput = possiblePermutations.map((input) => ({
         input,
-        tokens: this.apply(input, options),
+        tokens: this.apply(input, { modifiers: options?.modifiers, sets: options?.sets }),
       }));
 
       if (resolvedTokensByInput.length === 0 || !resolvedTokensByInput[0]?.tokens) {
@@ -223,9 +223,15 @@ export function createResolver(
       const [first, ...rest] = resolvedTokensByInput;
 
       const commonTokensRaw = Object.entries(first.tokens).reduce((acc, [id, token]) => {
+        if (options?.onlyAlias && !token.aliasOf) {
+          return acc;
+        } else if (options?.onlyPrimitive && token.aliasOf) {
+          return acc;
+        }
+
         const isCommon = rest.every(({ tokens }) => {
           const otherToken = tokens[id];
-          return otherToken && JSON.stringify(token.$value) === JSON.stringify(otherToken.$value);
+          return otherToken && JSON.stringify(otherToken.$value) === JSON.stringify(token.$value);
         });
 
         if (isCommon) {

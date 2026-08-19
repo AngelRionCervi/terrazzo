@@ -1,19 +1,30 @@
 {
-  "$type": "color",
-  "light": {
+  "mode-light": {
     "orange": {
-      "$value": "{light-orange}"
+      "$value": "{light-orange-400}"
     },
     "blue": {
-      "$value": "{light-blue}"
+      "$value": "{light-blue-400}"
+    },
+    "light-blue": {
+      "$value": "{light-blue-200}"
+    },
+    "dark-blue": {
+      "$value": "{dark-blue-800}"
     }
   },
-  "dark": {
+  "mode-dark": {
     "orange": {
-      "$value": "{dark-orange}"
+      "$value": "{dark-orange-400}"
     },
     "blue": {
-      "$value": "{dark-blue}"
+      "$value": "{dark-blue-400}"
+    },
+    "light-blue": {
+      "$value": "{light-blue-200}"
+    },
+    "dark-blue": {
+      "$value": "{dark-blue-800}"
     }
   }
 }

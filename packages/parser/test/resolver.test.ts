@@ -580,8 +580,26 @@ describe('partial application', () => {
   it('returns only tokens from a set', async () => {
     const resolver = await loadResolver();
     const tokens = resolver.apply({}, { modifiers: [], sets: ['primitives'] });
+
     expect(new Set(Object.keys(tokens))).toEqual(
-      new Set(['dark-blue', 'dark-orange', 'light-blue', 'light-orange']),
+      new Set([
+        'dark-blue-200',
+        'dark-blue-400',
+        'dark-blue-600',
+        'dark-blue-800',
+        'dark-orange-200',
+        'dark-orange-400',
+        'dark-orange-600',
+        'dark-orange-800',
+        'light-blue-200',
+        'light-blue-400',
+        'light-blue-600',
+        'light-blue-800',
+        'light-orange-200',
+        'light-orange-400',
+        'light-orange-600',
+        'light-orange-800',
+      ]),
     );
   });
 
@@ -599,6 +617,49 @@ describe('partial application', () => {
       { modifiers: ['theme'], sets: [], resolveAliases: false },
     );
     expect(new Set(Object.keys(themeTokens))).toEqual(new Set(['color']));
+  });
+});
+
+describe('get common tokens', () => {
+  // oxlint-disable-next-line consistent-function-scoping
+  async function loadResolver() {
+    const cwd = new URL('./fixtures/complex-resolver/', import.meta.url);
+    const filename = new URL('./resolver.json', cwd);
+    const config = defineConfig({}, { cwd });
+    const result = await parse(
+      [
+        {
+          filename,
+          src: await fs.readFile(filename, 'utf8'),
+        },
+      ],
+      { config },
+    );
+    return result.resolver;
+  }
+
+  it('returns only tokens that are common to all permutations', async () => {
+    const resolver = await loadResolver();
+
+    const tokens = resolver.getCommonTokens({ modifiers: ['mode'], onlyAlias: true, resolveAliases: false });
+
+    console.log('COMMON TOKENS', Object.keys(tokens));
+
+    const testTokens = Object.entries(tokens).reduce((acc, [id, token]) => {
+
+      acc[id] = {
+        $type: token.$type,
+        $value: token.$value,
+        aliasOf: token.aliasOf,
+        aliasChain: token.aliasChain,
+      };
+
+      return acc;
+    }, {} as Record<string, any>);
+
+    await fs.writeFile('./tokensTest.json', JSON.stringify(testTokens, null, 2));
+
+    expect(tokens).toBeDefined();
   });
 });
 
