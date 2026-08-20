@@ -377,7 +377,7 @@ export interface ResolverApplicationOptions {
   modifiers?: string[];
 }
 
-export interface ResolverCommonGetterOptions {
+export interface ResolverSetOperationOptions {
   /**
    * Resolve DTCG aliases when applying the input.
    *
@@ -403,15 +403,33 @@ export interface ResolverCommonGetterOptions {
    */
   modifiers?: string[];
 
-  onlyAlias?: boolean;
-
-  onlyPrimitive?: boolean;
+  /**
+   * Limit output to only tokens that are aliases of other tokens, only tokens that are primitives (not aliases), or both.
+   *
+   * @default 'both'
+   */
+  tokenOrigin?: 'alias' | 'primitive' | 'both';
 }
 
-export interface Resolver<
+export interface ResolverBase<
   Inputs extends Record<string, string[]> = Record<string, string[]>,
   Input = Record<keyof Inputs, Inputs[keyof Inputs][number]>,
 > {
+  /**
+   * Do all modifiers in this resolver operate on unique tokens?
+   *
+   * This is all-or-nothing, if even a single token is referenced in 2
+   * modifiers, the entire resolver is non-orthogonal.
+   */
+  orthogonal: boolean;
+  /**
+   * Default input for this resolver based on the default context of each modifiers
+   */
+  inputDefault: ResolverInput;
+  /**
+   * The original resolver document, simplified
+   */
+  source: ResolverSourceNormalized;
   /**
    * Supply values to modifiers to produce a final tokens set. This caches the
    * results, so calling a 2nd time with the same inputs will return the same
@@ -427,27 +445,39 @@ export interface Resolver<
    * If the resolver is deemed to complex, this API is not provided.
    */
   listPermutations?: () => Input[];
-  /* Generate a stable ID from any input */
-  getPermutationID: (input: Input) => string;
-  /** The original resolver document, simplified */
-  source: ResolverSourceNormalized;
-  /** Helper function for permutations—see if a particular input is valid. Automatically applies default values. */
-  isValidInput: (input: Input, throwError?: boolean) => boolean;
-  /**
-   * Do all modifiers in this resolver operate on unique tokens?
-   *
-   * This is all-or-nothing, if even a single token is referenced in 2
-   * modifiers, the entire resolver is non-orthogonal.
+  /*
+   * Generate a stable ID from any input
    */
-  orthogonal: boolean;
+  getPermutationID: (input: Input) => string;
+  /**
+   * Helper function for permutations—see if a particular input is valid. Automatically applies default values.
+   */
+  isValidInput: (input: Input, throwError?: boolean) => boolean;
+}
+
+export interface Resolver extends ResolverBase {
+  /**
+   * Extra helper functions to manipulate tokens resolved by this resolver
+   */
+  extras: ResolverExtras;
+}
+
+export interface ResolverExtras {
   /**
    * Produce a tokens set that only contains tokens common (in id and value) across the different sets and / or modifiers passed as options.
    * If no options are passed, it will return the tokens common across all sets and modifiers.
    *
    * This is useful for generating a "baseline" set of tokens that are guaranteed to be present across different permutations.
-   * It also caches the result, same as the apply method.
    */
-  getCommonTokens(options?: ResolverCommonGetterOptions): TokenNormalizedSet;
+  intersection(options?: ResolverSetOperationOptions): TokenNormalizedSet;
+
+  /**
+   * Produce a tokens set that only contains tokens unique (in id and value) across the different sets and / or modifiers passed as options.
+   * If no options are passed, it will return the tokens unique across all sets and modifiers.
+   *
+   * This is useful for generating sets of tokens that are unique to their permutations and do not include tokens present in other permutations.
+   */
+  symmetricDifference(options?: ResolverSetOperationOptions): TokenNormalizedSet;
 }
 
 export interface ResolverSource {

@@ -611,12 +611,12 @@ describe('partial application', () => {
     );
     // now with alias resolution disabled
     const modeTokens = resolver.apply({}, { modifiers: ['mode'], sets: [], resolveAliases: false });
-    expect(new Set(Object.keys(modeTokens))).toEqual(new Set(['blue', 'orange']));
+    expect(new Set(Object.keys(modeTokens))).toEqual(new Set(['blue', 'orange', 'light-blue', 'dark-blue']));
     const themeTokens = resolver.apply(
       {},
       { modifiers: ['theme'], sets: [], resolveAliases: false },
     );
-    expect(new Set(Object.keys(themeTokens))).toEqual(new Set(['color']));
+    expect(new Set(Object.keys(themeTokens))).toEqual(new Set(['main-color']));
   });
 });
 
@@ -638,26 +638,22 @@ describe('get common tokens', () => {
     return result.resolver;
   }
 
-  it('returns only tokens that are common to all permutations', async () => {
+  it('returns only alias tokens that are common to all permutations', async () => {
     const resolver = await loadResolver();
 
-    const tokens = resolver.getCommonTokens({ modifiers: ['mode'], onlyAlias: true, resolveAliases: false });
+    const tokens = resolver.extras.intersection({ tokenOrigin: 'alias', modifiers: ['mode'] });
 
     console.log('COMMON TOKENS', Object.keys(tokens));
 
-    const testTokens = Object.entries(tokens).reduce((acc, [id, token]) => {
+    expect(tokens).toBeDefined();
+  });
 
-      acc[id] = {
-        $type: token.$type,
-        $value: token.$value,
-        aliasOf: token.aliasOf,
-        aliasChain: token.aliasChain,
-      };
+  it('returns only alias tokens that are unique to all permutations', async () => {
+    const resolver = await loadResolver();
 
-      return acc;
-    }, {} as Record<string, any>);
+    const tokens = resolver.extras.symmetricDifference({ tokenOrigin: 'alias', modifiers: ['mode'] });
 
-    await fs.writeFile('./tokensTest.json', JSON.stringify(testTokens, null, 2));
+    console.log('UNIQUE TOKENS', Object.keys(tokens));
 
     expect(tokens).toBeDefined();
   });

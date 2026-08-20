@@ -9,12 +9,13 @@ import type {
   CreateResolverOptions,
   Resolver,
   ResolverApplicationOptions,
+  ResolverBase,
   ResolverInput,
   ResolverSourceNormalized,
   ResolveTokensOptions,
   TokenNormalizedSet,
 } from '../types.js';
-import { TZ_RESERVED_MODIFIER } from './constants.js';
+import { addResolverExtras } from './resolver-extras.js';
 
 function resolveTokens({
   input,
@@ -68,7 +69,7 @@ export function createResolver(
   resolverSource: ResolverSourceNormalized,
   { config, logger, sources, orthogonal }: CreateResolverOptions,
 ): Resolver {
-  const inputDefaults: ResolverInput = {};
+  const inputDefault: ResolverInput = {};
   const validContexts: Record<string, string[]> = {};
   const allPermutations: ResolverInput[] = [];
   const resolverCache: Record<string, TokenNormalizedSet> = {};
@@ -78,7 +79,7 @@ export function createResolver(
   for (const source of resolverSource.resolutionOrder) {
     if (source.type === 'modifier') {
       if (typeof source.default === 'string') {
-        inputDefaults[source.name] = source.default;
+        inputDefault[source.name] = source.default;
       }
       validContexts[source.name] = Object.keys(source.contexts);
     }
@@ -113,9 +114,10 @@ export function createResolver(
     return tokens;
   }
 
-  return {
+  const resolver: ResolverBase = {
     orthogonal,
     source: resolverSource,
+    inputDefault,
     listPermutations:
       permutationCount <= config.permutationLimit
         ? () => {
@@ -127,7 +129,7 @@ export function createResolver(
           }
         : undefined,
     apply(inputRaw, options) {
-      const input = { ...inputDefaults, ...inputRaw };
+      const input = { ...inputDefault, ...inputRaw };
       const permutationID = getPermutationID(input, options);
 
       if (resolverCache[permutationID]) {
@@ -174,7 +176,7 @@ export function createResolver(
       for (const [name, contexts] of Object.entries(validContexts)) {
         // Note: empty strings are valid! Don’t check for truthiness.
         if (typeof input[name] === 'string') {
-          if (name === TZ_RESERVED_MODIFIER) {
+          if (name === 'tzMode') {
             continue; // reserved modifier
           }
           if (!contexts.includes(input[name])) {
@@ -186,7 +188,7 @@ export function createResolver(
             }
             return false; // 2. invalid if unknown context
           }
-        } else if (!(name in inputDefaults)) {
+        } else if (!(name in inputDefault)) {
           if (throwError) {
             logger.error({
               group: 'resolver',
@@ -200,60 +202,9 @@ export function createResolver(
     },
     getPermutationID(input) {
       this.isValidInput(input, true);
-      return getPermutationID({ ...inputDefaults, ...input });
-    },
-    getCommonTokens(options) {
-      const permutationID = `common_${getPermutationID(inputDefaults, options)}`;
-
-      // if (resolverCache[permutationID]) {
-      //   return resolverCache[permutationID];
-      // }
-
-      const possiblePermutations = this.listPermutations?.() || [];
-
-      const resolvedTokensByInput = possiblePermutations.map((input) => ({
-        input,
-        tokens: this.apply(input, { modifiers: options?.modifiers, sets: options?.sets }),
-      }));
-
-      if (resolvedTokensByInput.length === 0 || !resolvedTokensByInput[0]?.tokens) {
-        return {};
-      }
-
-      const [first, ...rest] = resolvedTokensByInput;
-
-      const commonTokensRaw = Object.entries(first.tokens).reduce((acc, [id, token]) => {
-        if (options?.onlyAlias && !token.aliasOf) {
-          return acc;
-        } else if (options?.onlyPrimitive && token.aliasOf) {
-          return acc;
-        }
-
-        const isCommon = rest.every(({ tokens }) => {
-          const otherToken = tokens[id];
-          return otherToken && JSON.stringify(otherToken.$value) === JSON.stringify(token.$value);
-        });
-
-        if (isCommon) {
-          acc[id] = token;
-        }
-        return acc;
-      }, {} as TokenNormalizedSet);
-
-      if (!resolverSource._source.filename) {
-        logger.error({
-          group: 'resolver',
-          message: 'Resolver source has no filename property.',
-        });
-
-        return {};
-      }
-
-      const commonTokens = getProcessedTokens(commonTokensRaw, options) || {};
-
-      resolverCache[permutationID] = commonTokens;
-
-      return commonTokens;
+      return getPermutationID({ ...inputDefault, ...input });
     },
   };
+
+  return addResolverExtras(resolver);
 }

@@ -9,7 +9,8 @@
       ],
       "alpha": 1,
       "hex": "#cce5ff"
-    }
+    },
+    "$type": "color"
   },
   "light-blue-400": {
     "$value": {
@@ -21,7 +22,8 @@
       ],
       "alpha": 1,
       "hex": "#99ccff"
-    }
+    },
+    "$type": "color"
   },
   "light-blue-600": {
     "$value": {
@@ -33,7 +35,8 @@
       ],
       "alpha": 1,
       "hex": "#66b2ff"
-    }
+    },
+    "$type": "color"
   },
   "light-blue-800": {
     "$value": {
@@ -45,7 +48,8 @@
       ],
       "alpha": 1,
       "hex": "#3399ff"
-    }
+    },
+    "$type": "color"
   },
   "dark-blue-200": {
     "$value": {
@@ -57,7 +61,8 @@
       ],
       "alpha": 1,
       "hex": "#0022cc"
-    }
+    },
+    "$type": "color"
   },
   "dark-blue-400": {
     "$value": {
@@ -69,7 +74,8 @@
       ],
       "alpha": 1,
       "hex": "#001a99"
-    }
+    },
+    "$type": "color"
   },
   "dark-blue-600": {
     "$value": {
@@ -81,7 +87,8 @@
       ],
       "alpha": 1,
       "hex": "#001166"
-    }
+    },
+    "$type": "color"
   },
   "dark-blue-800": {
     "$value": {
@@ -93,7 +100,8 @@
       ],
       "alpha": 1,
       "hex": "#000933"
-    }
+    },
+    "$type": "color"
   },
   "light-orange-200": {
     "$value": {
@@ -105,7 +113,8 @@
       ],
       "alpha": 1,
       "hex": "#ffeecc"
-    }
+    },
+    "$type": "color"
   },
   "light-orange-400": {
     "$value": {
@@ -117,7 +126,8 @@
       ],
       "alpha": 1,
       "hex": "#ffdd99"
-    }
+    },
+    "$type": "color"
   },
   "light-orange-600": {
     "$value": {
@@ -129,7 +139,8 @@
       ],
       "alpha": 1,
       "hex": "#ffcc66"
-    }
+    },
+    "$type": "color"
   },
   "light-orange-800": {
     "$value": {
@@ -141,7 +152,8 @@
       ],
       "alpha": 1,
       "hex": "#ffbb33"
-    }
+    },
+    "$type": "color"
   },
   "dark-orange-200": {
     "$value": {
@@ -153,7 +165,8 @@
       ],
       "alpha": 1,
       "hex": "#cc5200"
-    }
+    },
+    "$type": "color"
   },
   "dark-orange-400": {
     "$value": {
@@ -165,7 +178,8 @@
       ],
       "alpha": 1,
       "hex": "#994000"
-    }
+    },
+    "$type": "color"
   },
   "dark-orange-600": {
     "$value": {
@@ -177,7 +191,8 @@
       ],
       "alpha": 1,
       "hex": "#662b00"
-    }
+    },
+    "$type": "color"
   },
   "dark-orange-800": {
     "$value": {
@@ -189,6 +204,7 @@
       ],
       "alpha": 1,
       "hex": "#331500"
-    }
+    },
+    "$type": "color"
   }
 }
