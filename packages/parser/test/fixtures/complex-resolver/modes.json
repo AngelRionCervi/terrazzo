@@ -11,6 +11,18 @@
     },
     "dark-blue": {
       "$value": "{dark-blue-800}"
+    },
+    "light-grey": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.8,
+          0.8,
+          0.8
+        ],
+        "alpha": 1,
+        "hex": "#cccccc"
+      }
     }
   },
   "mode-dark": {
@@ -25,6 +37,18 @@
     },
     "dark-blue": {
       "$value": "{dark-blue-800}"
+    },
+    "light-grey": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.9,
+          0.9,
+          0.9
+        ],
+        "alpha": 1,
+        "hex": "#e6e6e6"
+      }
     }
   }
 }

@@ -611,12 +611,14 @@ describe('partial application', () => {
     );
     // now with alias resolution disabled
     const modeTokens = resolver.apply({}, { modifiers: ['mode'], sets: [], resolveAliases: false });
-    expect(new Set(Object.keys(modeTokens))).toEqual(new Set(['blue', 'orange', 'light-blue', 'dark-blue']));
+    expect(new Set(Object.keys(modeTokens))).toEqual(
+      new Set(['blue', 'orange', 'light-blue', 'dark-blue', 'light-grey']),
+    );
     const themeTokens = resolver.apply(
       {},
       { modifiers: ['theme'], sets: [], resolveAliases: false },
     );
-    expect(new Set(Object.keys(themeTokens))).toEqual(new Set(['main-color']));
+    expect(new Set(Object.keys(themeTokens))).toEqual(new Set(['main-color', 'secondary-color']));
   });
 });
 
@@ -638,24 +640,123 @@ describe('get common tokens', () => {
     return result.resolver;
   }
 
-  it('returns only alias tokens that are common to all permutations', async () => {
+  const primitiveSetTokens = [
+    'dark-blue-200',
+    'dark-blue-400',
+    'dark-blue-600',
+    'dark-blue-800',
+    'dark-orange-200',
+    'dark-orange-400',
+    'dark-orange-600',
+    'dark-orange-800',
+    'light-blue-200',
+    'light-blue-400',
+    'light-blue-600',
+    'light-blue-800',
+    'light-orange-200',
+    'light-orange-400',
+    'light-orange-600',
+    'light-orange-800',
+  ];
+
+  //////////////////////////
+  ///// intersection() /////
+  //////////////////////////
+  it('returns all tokens common in value across all modifiers permutations', async () => {
     const resolver = await loadResolver();
+    const tokens = resolver.extras.intersection();
 
-    const tokens = resolver.extras.intersection({ tokenOrigin: 'alias', modifiers: ['mode'] });
-
-    console.log('COMMON TOKENS', Object.keys(tokens));
-
-    expect(tokens).toBeDefined();
+    expect(new Set(Object.keys(tokens))).toEqual(
+      new Set([
+        'dark-blue',
+        'light-blue',
+        'secondary-color',
+        'papaya',
+        'purple',
+        ...primitiveSetTokens,
+      ]),
+    );
   });
 
-  it('returns only alias tokens that are unique to all permutations', async () => {
+  it('returns primitive tokens common in value across all modifiers permutations', async () => {
     const resolver = await loadResolver();
+    const tokens = resolver.extras.intersection({ tokenOrigin: 'primitive' });
 
-    const tokens = resolver.extras.symmetricDifference({ tokenOrigin: 'alias', modifiers: ['mode'] });
+    expect(new Set(Object.keys(tokens))).toEqual(
+      new Set(['papaya', 'purple', ...primitiveSetTokens]),
+    );
+  });
 
-    console.log('UNIQUE TOKENS', Object.keys(tokens));
+  it('returns only alias tokens common in value across all modifiers permutations', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.intersection({ tokenOrigin: 'alias' });
 
-    expect(tokens).toBeDefined();
+    expect(new Set(Object.keys(tokens))).toEqual(
+      new Set(['dark-blue', 'light-blue', 'secondary-color']),
+    );
+  });
+
+  it('returns only alias tokens common in value across all permutations in the "mode" modifier subset', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.intersection({ tokenOrigin: 'alias', modifiers: ['mode'] });
+
+    expect(new Set(Object.keys(tokens))).toEqual(new Set(['dark-blue', 'light-blue']));
+  });
+
+  it('returns only alias tokens common in value across all permutations in the "mode" and "theme" modifiers subset', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.intersection({
+      tokenOrigin: 'alias',
+      modifiers: ['mode', 'theme'],
+    });
+
+    expect(new Set(Object.keys(tokens))).toEqual(
+      new Set(['dark-blue', 'light-blue', 'secondary-color']),
+    );
+  });
+
+  /////////////////////////////////
+  ///// symmetricDifference() /////
+  /////////////////////////////////
+  it('returns all tokens unique in value across all modifiers permutations', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.symmetricDifference();
+
+    expect(new Set(Object.keys(tokens))).toEqual(
+      new Set(['main-color', 'blue', 'orange', 'light-grey']),
+    );
+  });
+
+  it('returns only primitive tokens unique in value across all modifiers permutations', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.symmetricDifference({
+      tokenOrigin: 'primitive',
+    });
+
+    expect(new Set(Object.keys(tokens))).toEqual(new Set(['light-grey']));
+  });
+
+  it('returns only alias tokens unique in value to all modifiers permutations', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.symmetricDifference({
+      tokenOrigin: 'alias',
+    });
+
+    expect(new Set(Object.keys(tokens))).toEqual(new Set(['main-color', 'blue', 'orange']));
+  });
+
+  it('returns only alias tokens unique in value across all permutations in the "theme" modifier subset', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.symmetricDifference({ tokenOrigin: 'alias', modifiers: ['theme'] });
+
+    expect(new Set(Object.keys(tokens))).toEqual(new Set(['main-color']));
+  });
+
+  it('returns only alias tokens unique in value across all permutations in the "theme" and "mode" modifiers subset', async () => {
+    const resolver = await loadResolver();
+    const tokens = resolver.extras.symmetricDifference({ tokenOrigin: 'alias', modifiers: ['theme', 'mode'] });
+
+    expect(new Set(Object.keys(tokens))).toEqual(new Set(['main-color', 'blue', 'orange']));
   });
 });
 

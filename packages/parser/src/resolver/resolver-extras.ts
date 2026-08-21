@@ -5,13 +5,17 @@ import type { Resolver, ResolverBase } from '../types.js';
 
 function resolveAllPermutations(
   resolver: ResolverBase,
-  options?: { modifiers?: string[]; sets?: string[] },
+  options?: { modifiers?: string[]; resolveAliases?: boolean },
 ) {
+  const { modifiers, resolveAliases } = options || {};
   const possiblePermutations = resolver.listPermutations?.() || [];
 
   const resolvedTokens = possiblePermutations.map((input) => ({
     input,
-    tokens: resolver.apply(input, { modifiers: options?.modifiers, sets: options?.sets }),
+    tokens: resolver.apply(input, {
+      modifiers,
+      resolveAliases,
+    }),
   }));
 
   return resolvedTokens;

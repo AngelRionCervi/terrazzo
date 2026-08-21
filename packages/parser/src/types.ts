@@ -377,22 +377,13 @@ export interface ResolverApplicationOptions {
   modifiers?: string[];
 }
 
-export interface ResolverSetOperationOptions {
+export interface ResolverExtrasOperationOptions {
   /**
    * Resolve DTCG aliases when applying the input.
    *
    * @default true
    */
   resolveAliases?: boolean;
-  /**
-   * Limit input application only to the listed sets.
-   *
-   * In combination with `modifiers`, this will limit output to only
-   * tokens declared within the options given. If tokens are referenced by alises
-   * outside these options, the application will fail unless `resolveAliases` is
-   * set to false.
-   */
-  sets?: string[];
   /**
    * Limit input application only to the listed modifiers.
    *
@@ -469,7 +460,7 @@ export interface ResolverExtras {
    *
    * This is useful for generating a "baseline" set of tokens that are guaranteed to be present across different permutations.
    */
-  intersection(options?: ResolverSetOperationOptions): TokenNormalizedSet;
+  intersection(options?: ResolverExtrasOperationOptions): TokenNormalizedSet;
 
   /**
    * Produce a tokens set that only contains tokens unique (in id and value) across the different sets and / or modifiers passed as options.
@@ -477,7 +468,7 @@ export interface ResolverExtras {
    *
    * This is useful for generating sets of tokens that are unique to their permutations and do not include tokens present in other permutations.
    */
-  symmetricDifference(options?: ResolverSetOperationOptions): TokenNormalizedSet;
+  symmetricDifference(options?: ResolverExtrasOperationOptions): TokenNormalizedSet;
 }
 
 export interface ResolverSource {
