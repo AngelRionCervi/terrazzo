@@ -22,12 +22,12 @@ export const SINGLE_VALUE = 'SINGLE_VALUE';
 export const MULTI_VALUE = 'MULTI_VALUE';
 
 /** Validate plugin setTransform() calls for immediate feedback */
-function validateTransformParams({
-  params,
+function validateTransformValue({
+  value,
   logger,
   pluginName,
 }: {
-  params: TokenTransformed;
+  value: string | Record<string, string>;
   logger: Logger;
   pluginName: string;
 }): void {
@@ -35,20 +35,20 @@ function validateTransformParams({
 
   // validate value is valid for SINGLE_VALUE or MULTI_VALUE
   if (
-    !params.value ||
-    (typeof params.value !== 'string' && typeof params.value !== 'object') ||
-    Array.isArray(params.value)
+    !value ||
+    (typeof value !== 'string' && typeof value !== 'object') ||
+    Array.isArray(value)
   ) {
     logger.error({
       ...baseMessage,
       message: `setTransform() value expected string or object of strings, received ${
-        Array.isArray(params.value) ? 'Array' : typeof params.value
+        Array.isArray(value) ? 'Array' : typeof value
       }`,
     });
   }
   if (
-    typeof params.value === 'object' &&
-    Object.values(params.value).some((v) => typeof v !== 'string')
+    typeof value === 'object' &&
+    Object.values(value).some((v) => typeof v !== 'string')
   ) {
     logger.error({
       ...baseMessage,
@@ -92,7 +92,7 @@ export default async function build(
       // Optimization: don’t create wildcard matcher if single token IDs are requested—it’s slow and pointless
       const singleTokenID =
         (typeof params.id === 'string' && tokens[params.id]?.id) ||
-        (Array.isArray(params.id) && params.id.length === 1 && tokens[params.id[0]!]?.id) ||
+        (Array.isArray(params.id) && params.id.length === 1 && tokens[params.id[0] ?? '']?.id) ||
         undefined;
       const $type =
         (typeof params.$type === 'string' && [params.$type]) ||
@@ -105,7 +105,7 @@ export default async function build(
       const modeMatcher =
         mode && mode !== '.' && !isFullWildcard(mode) ? cachedMatcher.match(mode) : null;
 
-      return (formats[params.format!]?.[permutationID] ?? []).filter((token) => {
+      return (formats[params.format]?.[permutationID] ?? []).filter((token) => {
         if ((singleTokenID && token.id !== singleTokenID) || (idMatcher && !idMatcher(token.id))) {
           return false;
         }
@@ -141,9 +141,10 @@ export default async function build(
             });
             return;
           }
-          const token = tokens[id]!;
+          const token = tokens[id];
           if (!token) {
             logger.error({ group: 'plugin', label: plugin.name, message: `No token "${id}"` });
+            return;
           }
           const isLegacyModes =
             params.input && Object.keys(params.input).length === 1 && 'tzMode' in params.input;
@@ -155,21 +156,25 @@ export default async function build(
           const cleanValue: TokenTransformed['value'] =
             typeof params.value === 'string'
               ? params.value
-              : { ...(params.value as Record<string, string>) };
-          validateTransformParams({
+              : { ...params.value };
+          validateTransformValue({
             logger,
-            params: { ...(params as any), value: cleanValue },
+            value: cleanValue,
             pluginName: plugin.name,
           });
 
           // upsert
           if (!formats[params.format]) {
-            formats[params.format] = { [FALLBACK_PERMUTATION_ID]: [] };
+            formats[params.format] =  {
+              [FALLBACK_PERMUTATION_ID]: [],
+            };
           }
-          if (!formats[params.format]![permutationID]) {
-            formats[params.format]![permutationID] = [];
+          const format = formats[params.format] || {};
+          if (!format[permutationID]) {
+            format[permutationID] = [];
           }
-          const foundTokenI = formats[params.format]![permutationID]!.findIndex(
+          const transformedTokens = format[permutationID];
+          const foundTokenI = transformedTokens.findIndex(
             (t) =>
               id === t.id &&
               (!params.localID || params.localID === t.localID) &&
@@ -189,7 +194,7 @@ export default async function build(
             // backwards compat: upconvert mode into "tzMode" modifier. This
             // allows newer plugins to use resolver syntax without disrupting
             // older plugins.
-            formats[params.format]![permutationID]!.push(transformedToken);
+            transformedTokens.push(transformedToken);
 
             // If this is a “default” permutation, this should also be duplicated in the global space
             if (
@@ -197,12 +202,15 @@ export default async function build(
               Object.keys(params.input).length === 0 &&
               permutationID !== FALLBACK_PERMUTATION_ID
             ) {
-              formats[params.format]![FALLBACK_PERMUTATION_ID]!.push(transformedToken);
+              const fallbackTokens = format[FALLBACK_PERMUTATION_ID] || [];
+              fallbackTokens.push(transformedToken);
             }
           } else {
-            formats[params.format]![permutationID]![foundTokenI]!.value = cleanValue;
-            formats[params.format]![permutationID]![foundTokenI]!.type =
-              typeof cleanValue === 'string' ? SINGLE_VALUE : MULTI_VALUE;
+            const foundToken = transformedTokens[foundTokenI];
+            if (foundToken) {
+              foundToken.value = cleanValue;
+              foundToken.type = typeof cleanValue === 'string' ? SINGLE_VALUE : MULTI_VALUE;
+            }
           }
         },
         resolver,
